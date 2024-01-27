@@ -10,3 +10,8 @@ The goal is to allow a small installation size with no additional install requir
 While technically this could be a portable file due to WebView2 being installed on window's 11 it's a tiny install anyway.
 
 For now once its working I will upload a copy manually to the releases page, but I will automate it if I continue to work on this.
+
+
+Oh and also this is my first svelte project because I wanted to try it out, so I'm sure there are better ways to do things :)
+
+As of creating the project it can only open player saves, check [this ticket](https://github.com/sekwah41/palworld-save-editor/issues/2) to see the progress on opening the other sav files.
