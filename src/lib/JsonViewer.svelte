@@ -5,27 +5,36 @@
     import {invoke} from "@tauri-apps/api/core";
     import {onDestroy} from "svelte";
 
-    let content = writable({
+    let content = writable<{json: any}>({
         json: {
             "empty": "drag a player.sav file on to edit it",
         }
     });
 
-    const sav_file = listen("sav_file", (result) => {
+    const sav_file = listen<{json: any}>("sav_file", (result) => {
         if (typeof result.payload === "string") {
             content.set({
                 json: JSON.parse(result.payload)
             });
             console.log(content);
         }
+
     });
 
-    let editorStyle = {
-        height: '600px' // Set the height here
-    };
+    const open_err = listen("open_err", (result) => {
+        if (typeof result.payload === "string") {
+            content.set({
+                json: {
+                    err: result.payload,
+                }
+            });
+            console.log(content);
+        }
+    });
 
     onDestroy(() => {
         sav_file.then((f) => f());
+        open_err.then((f) => f());
     });
 </script>
 
@@ -41,11 +50,12 @@
 <style>
     .json {
         flex: 1;
+        overflow: auto;
     }
     .viewer {
         display: flex;
         flex-direction: column;
-        height: 100%;
+        height: 100vh;
         width: 100%;
     }
     .actions {

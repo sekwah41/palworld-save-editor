@@ -41,15 +41,16 @@ fn open_sav_file(path: &OsString) -> io::Result<String> {
     for (path, t) in PALWORLD_TYPES.iter() {
         types.add(path.parse().unwrap(), StructType::from(t.to_string()));
     }
-    if let Ok(save) = Save::read_with_types(&mut decompressed_data_cursor, &types) {
-        let json = serde_json::to_string_pretty(&save)?;
+    match Save::read_with_types(&mut decompressed_data_cursor, &types) {
+        Ok(save) => {
+            let json = serde_json::to_string_pretty(&save)?;
 
-        return Ok(json);
-    } else {
-        println!("Failed to read save");
+            return Ok(json);
+        }
+        Err(e) => {
+            return Err(io::Error::new(io::ErrorKind::InvalidData, format!("Failed to read save: {}", e)))
+        }
     }
-
-    Err(io::Error::new(io::ErrorKind::InvalidData, "Failed to read save"))
 }
 
 fn main() {
@@ -69,9 +70,14 @@ fn main() {
                             if let Some(path) = path {
                                 let os_string = path.clone().into_os_string();
                                 let json = open_sav_file(&os_string);
-                                if let Ok(json) = json {
-                                    window.emit("sav_file", json).unwrap();
-                                    window.emit("sav_path", os_string).unwrap();
+                                match json {
+                                    Ok(json) => {
+                                        window.emit("sav_file", json).unwrap();
+                                        window.set_title(&*format!("palworld-save-editor - {:>5?}", path.to_str().expect("Expect file path"))).unwrap();
+                                    }
+                                    Err(e) => {
+                                        window.emit("open_err", format!("Failed to open file: {}", e)).unwrap();
+                                    }
                                 }
                             }
                         }
