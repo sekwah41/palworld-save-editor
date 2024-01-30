@@ -6,7 +6,7 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "palworld-sav-editor",
+    "productName": "palworld-save-editor",
     "version": "1.0.0"
   },
   "tauri": {
