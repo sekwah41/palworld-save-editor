@@ -11,14 +11,19 @@
         }
     });
 
-    const sav_file = listen<{json: any}>("sav_file", (result) => {
-        if (typeof result.payload === "string") {
-            content.set({
-                json: JSON.parse(result.payload)
-            });
-            console.log(content);
-        }
+    let save_type = writable<number>(0);
 
+    let path = writable<string>("");
+
+    const sav_file = listen<string>("sav_file", (result) => {
+        content.set({
+            json: JSON.parse(result.payload[0])
+        });
+        save_type.set(Number(result.payload[1]));
+    });
+
+    const sav_path = listen<string>("sav_path", (result) => {
+        path.set(result.payload);
     });
 
     const open_err = listen("open_err", (result) => {
@@ -35,6 +40,7 @@
     onDestroy(() => {
         sav_file.then((f) => f());
         open_err.then((f) => f());
+        sav_path.then((f) => f());
     });
 </script>
 
@@ -43,8 +49,18 @@
         <JSONEditor bind:content={$content}/>
     </div>
     <div class="actions">
-        <button on:click={() => invoke("save_file", {content: JSON.stringify($content.json)})}>Save</button>
+        <div class="left-items">
+        <button on:click={() => invoke("save_file", {
+            json: JSON.stringify($content.json),
+            path: $path,
+        })}>Save</button>
+        Always make a backup before saving - File Type {$save_type}
+        </div>
+        <div class="right-items">
+            <button class="right-button" on:click={() => invoke("open_saves_folder")}>Open Saves Folder</button>
+        </div>
     </div>
+
 </div>
 
 <style>
@@ -59,6 +75,8 @@
         width: 100%;
     }
     .actions {
+        display: flex;
+        justify-content: space-between;
         background-color: #f0f0f0;
     }
 </style>

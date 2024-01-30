@@ -1,17 +1,13 @@
 # Palworld save editor
 
-This is just a quick project I created to mess around with the palworld saves as I wanted to save players progress after I had reverted to a backup.
+This is just a quick project I created to mess around with the Palworld saves as I was having a couple of troubles.
 
-Initially this will just be a simple save editor, but I may add more features in the future e.g. copying inventory from a backup file, converting a single player world to a dedicated etc.
+I have no plans currently to add extra features though will review any if people want to add them. Also, if something seems like a fun challenge I may also have a go.
 
-This is meant to be a rust version with a GUI inspired by [palworld-save-tools](https://github.com/cheahjs/palworld-save-tools).
+This project cant currently decode the while file so additional types will need to be added or logic to properly decode them, while im not sure if ill continue the project I may take a look at it for fun at some point.
 
-The goal is to allow a small installation size with no additional install requirements.
-While technically this could be a portable file due to WebView2 being installed on window's 11 it's a tiny install anyway.
+This project currently uses uesave-rs to read and write the save files.
 
-For now once its working I will upload a copy manually to the releases page, but I will automate it if I continue to work on this.
+I tend to make a lot of random tools for myself so if you would like this project to be continued, please let me know by creating an issue, discussion or messaging me on discord (I'm in the palworld discord server).
 
-
-Oh and also this is my first svelte project because I wanted to try it out, so I'm sure there are better ways to do things :)
-
-As of creating the project it can only open player saves, check [this ticket](https://github.com/sekwah41/palworld-save-editor/issues/2) to see the progress on opening the other sav files.
+For large level files it can take quite a while to open, though it should eventually become responsive :)
