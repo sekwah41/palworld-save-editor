@@ -25,6 +25,9 @@
     "security": {
       "csp": null
     },
+    "targets": [
+      "msi"
+    ],
     "windows": [
       {
         "fullscreen": false,
