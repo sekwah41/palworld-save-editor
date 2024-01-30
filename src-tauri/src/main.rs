@@ -101,7 +101,7 @@ fn save_file(json: &str, save_type: u8, path: &str) -> String {
         compressed_data = encoder_res.unwrap();
     }
 
-    let file = File::create(format!("{}test",path));
+    let file = File::create(format!("{}",path));
     if let Err(err) = file {
         return format!("Failed to create file: {}", err);
     }
