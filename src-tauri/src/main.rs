@@ -10,7 +10,7 @@ use std::path::Path;
 use std::process::Command;
 use flate2::read::ZlibDecoder;
 use uesave::{Save, StructType, Types};
-use byteorder::{LittleEndian, ReadBytesExt};
+use byteorder::{LittleEndian, ReadBytesExt, WriteBytesExt};
 
 const PALWORLD_TYPES: [(&str, &str); 6] = [
     (".worldSaveData.CharacterSaveParameterMap.Key", "Struct"),
@@ -80,11 +80,26 @@ fn save_file(json: &str, save_type: u8, path: &str) -> String {
     if let Err(err) = encoder.write_all(&reconstructed) {
         return format!("Failed to compress save: {}", err);
     }
-    let compressed_data = encoder.finish();
-    if let Err(err) = compressed_data {
+    let mut encoder_res = encoder.finish();
+    if let Err(err) = encoder_res {
         return format!("Failed to finish compression: {}", err);
     }
-    let compressed_data = compressed_data.unwrap();
+
+    let mut compressed_data = encoder_res.unwrap();
+
+    let mut compressed_len = compressed_data.len() as u32;
+
+    if save_type == 0x32u8 {
+        let mut encoder = flate2::write::ZlibEncoder::new(Vec::new(), flate2::Compression::default());
+        if let Err(err) = encoder.write_all(&compressed_data) {
+            return format!("Failed to compress save: {}", err);
+        }
+        encoder_res = encoder.finish();
+        if let Err(err) = encoder_res {
+            return format!("Failed to finish compression: {}", err);
+        }
+        compressed_data = encoder_res.unwrap();
+    }
 
     let file = File::create(format!("{}test",path));
     if let Err(err) = file {
@@ -92,9 +107,15 @@ fn save_file(json: &str, save_type: u8, path: &str) -> String {
     }
 
     let mut file = file.unwrap();
-    if let Err(err) = file.write_all(&*compressed_data) {
-        return format!("Failed to write file: {}", err);
-    }
+    println!("Writing file...");
+    println!("Uncompressed len: {}", reconstructed.len());
+    let _ = file.write_u32::<LittleEndian>(reconstructed.len() as u32);
+    println!("Compressed len: {}", compressed_len);
+    let _ = file.write_u32::<LittleEndian>(compressed_len);
+    let _ = file.write_all(b"PlZ");
+    let _ = file.write_u8(save_type);
+    let _ = file.write_all(&*compressed_data);
+    println!("Saved file successfully!");
 
     return "Saved file successfully!".to_string();
 }
@@ -126,7 +147,7 @@ fn open_sav_file(path: &OsString) -> io::Result<(String, u8)> {
     }
 
     if save_type == &0x31u8 && compressed_len != (buffer.len() as u32 - 12) {
-        return Err(io::Error::new(io::ErrorKind::InvalidData, format!("Invalid uncompressed len {} != {}", compressed_len, buffer.len())));
+        return Err(io::Error::new(io::ErrorKind::InvalidData, format!("Invalid compressed len {} != {}", compressed_len, buffer.len())));
     }
 
     println!("Decompressing...");
@@ -138,7 +159,7 @@ fn open_sav_file(path: &OsString) -> io::Result<(String, u8)> {
 
     if save_type == &0x32u8 {
         if compressed_len != (decompressed_data.len() as u32) {
-            return Err(io::Error::new(io::ErrorKind::InvalidData, format!("Invalid uncompressed len {} != {}", compressed_len, buffer.len())));
+            return Err(io::Error::new(io::ErrorKind::InvalidData, format!("Invalid uncompressed len {} != {}", compressed_len, decompressed_data.len())));
         }
         let mut double_decompressed_data = Vec::new();
         let mut double_decompressor = ZlibDecoder::new(decompressed_data.as_slice());
