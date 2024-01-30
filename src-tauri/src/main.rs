@@ -64,7 +64,7 @@ fn open_saves_folder() {
 
 // The current logic of saving and loading is copied from the palworld-host-save-fix
 #[tauri::command]
-fn save_file(json: &str, path: &str) -> String {
+fn save_file(json: &str, save_type: u8, path: &str) -> String {
     println!("Saving file: {}", path);
     if path == "" {
         return "No file path provided!".to_string();

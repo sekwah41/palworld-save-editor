@@ -52,6 +52,7 @@
         <div class="left-items">
         <button on:click={() => invoke("save_file", {
             json: JSON.stringify($content.json),
+            save_type: $save_type,
             path: $path,
         })}>Save</button>
         Always make a backup before saving - File Type {$save_type}

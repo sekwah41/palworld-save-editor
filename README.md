@@ -1,4 +1,4 @@
-# Palworld save editor
+# Palworld Save Editor
 
 This is just a quick project I created to mess around with the Palworld saves as I was having a couple of troubles.
 
